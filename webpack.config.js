@@ -1,6 +1,4 @@
 const path = require('path')
-
-// plugins
 const CopyPlugin = require('copy-webpack-plugin')
 
 module.exports = {
@@ -9,12 +7,21 @@ module.exports = {
     path: path.join(__dirname, 'dist'),
     filename: 'bundle.js'
   },
+
   plugins: [
     new CopyPlugin([
-      // copy assets to dist
-      { from: './assets', to: '.dist/assets' }
+      {
+        from: './assets',
+        // NOTE: the "to" endpoint is relative
+        // to the output path
+        to: './assets'
+      }
     ])
   ],
+
+  module: {
+    rules: []
+  },
   devServer: {
     contentBase: './dist'
   }

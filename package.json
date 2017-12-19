@@ -8,11 +8,12 @@
     "start": "webpack-dev-server"
   },
   "dependencies": {
-    "phaser": "^2.6.2",
-    "webpack-dev-server": "^2.9.7"
+    "image-webpack-loader": "^3.4.2",
+    "phaser": "^2.6.2"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^4.3.0",
-    "webpack": "^3.10.0"
+    "webpack": "^3.10.0",
+    "webpack-dev-server": "^2.9.7"
   }
 }
