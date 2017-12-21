@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "image-webpack-loader": "^3.4.2",
-    "phaser": "^2.6.2"
+    "phaser-ce": "^2.9.3"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^4.3.0",
