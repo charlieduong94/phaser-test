@@ -6,52 +6,49 @@ const { Game } = Phaser
 
 const game = new Game(1200, 800, Phaser.CANVAS, 'phaser-test', {
   preload () {
-    game.load.image('cat', './assets/persona5_cat.jpg')
     game.load.image('coin', './assets/coin.png')
   },
 
   create () {
-    createCoin(0, 100);
-    createCoin(200, 100);
-    createCoin(400, 100);
-    createCoin(600, 100);
-    createCoin(800, 100);
-  },
+    for (let x = 0; x < 1200; x += 200) {
+      for (let y = 0; y < 800; y += 200) {
+        createCoin(x - 150, y - 150)
+      }
+    }
+  }
 });
 
 function createCoin (xPos, yPos) {
-  // const sprite = game.add.sprite(80, 0, 'cat');
   const coinSprite = game.add.sprite(xPos, yPos, 'coin')
 
   // simple tween animation
   const tween = game.add.tween(coinSprite)
-  // .to({ y: 100 }, 1000, Phaser.Easing.Linear.None)
-    .to({ y: 0 }, 1000, Phaser.Easing.Linear.None)
+    .to({ y: yPos - 100 }, 1000, Phaser.Easing.Linear.None)
 
-  // tween.loop(true)
-  // tween.start()
+  tween.onComplete.add(() => coinSprite.destroy())
 
+  // Blend the colors a bit to simulate a fade out
   const startColor = 0xffffff
-
   const colorBlend = { step: 100 };
   const colorTween = game.add.tween(colorBlend)
-  // .to({ step: 100 }, 1000, Phaser.Easing.Linear.None)
     .to({ step: 0 }, 1000, Phaser.Easing.Linear.None)
 
   colorTween.onUpdateCallback(() => {
     coinSprite.tint = Phaser.Color.interpolateColor(0xffffff, 0x0000ff, 100, colorBlend.step)
   });
 
-  tween.onComplete.add(() => {
-    coinSprite.destroy()
-  })
-
-  // colorTween.loop(true)
-  // colorTween.start()
-
+  // enable input
   coinSprite.inputEnabled = true
+
+  coinSprite.input.pixelPerfectClick = true
+  coinSprite.input.pixelPerfectOver = true
+  coinSprite.input.useHandCursor = true
+
+  // on click, start the tween
   coinSprite.events.onInputDown.add(() => {
-    tween.start()
-    colorTween.start()
+    if (coinSprite.input.pointerOver()) {
+      tween.start()
+      colorTween.start()
+    }
   })
 }
