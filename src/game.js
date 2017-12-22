@@ -12,7 +12,7 @@ const game = new Game(1200, 800, Phaser.CANVAS, 'phaser-test', {
   create () {
     for (let x = 0; x < 1200; x += 200) {
       for (let y = 0; y < 800; y += 200) {
-        createCoin(x - 150, y - 150)
+        createCoin(x - 40, y - 40)
       }
     }
   }
@@ -21,11 +21,14 @@ const game = new Game(1200, 800, Phaser.CANVAS, 'phaser-test', {
 function createCoin (xPos, yPos) {
   const coinSprite = game.add.sprite(xPos, yPos, 'coin')
 
-  // simple tween animation
-  const tween = game.add.tween(coinSprite)
-    .to({ y: yPos - 100 }, 1000, Phaser.Easing.Linear.None)
+  const idleTween = game.add.tween(coinSprite)
+    .to({ x: xPos + 80 }, 1000, Phaser.Easing.Linear.None)
+    .to({ y: yPos + 80 }, 1000, Phaser.Easing.Linear.None)
+    .to({ x: xPos }, 1000, Phaser.Easing.Linear.None)
+    .to({ y: yPos }, 1000, Phaser.Easing.Linear.None)
 
-  tween.onComplete.add(() => coinSprite.destroy())
+  idleTween.loop(true)
+  idleTween.start()
 
   // Blend the colors a bit to simulate a fade out
   const startColor = 0xffffff
@@ -36,6 +39,12 @@ function createCoin (xPos, yPos) {
   colorTween.onUpdateCallback(() => {
     coinSprite.tint = Phaser.Color.interpolateColor(0xffffff, 0x0000ff, 100, colorBlend.step)
   });
+
+  // simple onClick tween
+  const clickTween = game.add.tween(coinSprite)
+    .to({ y: yPos - 100 }, 1000, Phaser.Easing.Linear.None)
+
+  clickTween.onComplete.add(() => coinSprite.destroy())
 
   // enable spritesheet animations
   coinSprite.animations.add('morph', [ 0, 1 ], 2, true)
@@ -51,7 +60,8 @@ function createCoin (xPos, yPos) {
   // on click, start the tween
   coinSprite.events.onInputDown.add(() => {
     if (coinSprite.input.pointerOver()) {
-      tween.start()
+      idleTween.stop()
+      clickTween.start()
       colorTween.start()
     }
   })
