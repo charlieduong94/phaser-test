@@ -10,6 +10,8 @@ const game = new Game(1200, 800, Phaser.CANVAS, 'phaser-test', {
   },
 
   create () {
+    //game.stage.backgroundColor = '#FFFFFF'
+
     for (let x = 0; x < 1200; x += 200) {
       for (let y = 0; y < 800; y += 200) {
         createCoin(x - 40, y - 40)
@@ -37,7 +39,7 @@ function createCoin (xPos, yPos) {
     .to({ step: 0 }, 1000, Phaser.Easing.Linear.None)
 
   colorTween.onUpdateCallback(() => {
-    coinSprite.tint = Phaser.Color.interpolateColor(0xffffff, 0x0000ff, 100, colorBlend.step)
+    coinSprite.alpha = colorBlend.step / 100
   });
 
   // simple onClick tween
