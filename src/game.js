@@ -6,7 +6,7 @@ const { Game } = Phaser
 
 const game = new Game(1200, 800, Phaser.CANVAS, 'phaser-test', {
   preload () {
-    game.load.image('coin', './assets/coin.png')
+    game.load.spritesheet('coin', './assets/coin-spritesheet.png', 160, 160, 2)
   },
 
   create () {
@@ -36,6 +36,10 @@ function createCoin (xPos, yPos) {
   colorTween.onUpdateCallback(() => {
     coinSprite.tint = Phaser.Color.interpolateColor(0xffffff, 0x0000ff, 100, colorBlend.step)
   });
+
+  // enable spritesheet animations
+  coinSprite.animations.add('morph', [ 0, 1 ], 2, true)
+  coinSprite.animations.play('morph')
 
   // enable input
   coinSprite.inputEnabled = true
