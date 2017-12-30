@@ -5,7 +5,7 @@
   "author": "Charlie Duong",
   "license": "MIT",
   "scripts": {
-    "start": "webpack-dev-server"
+    "start": "webpack-dev-server --open"
   },
   "dependencies": {
     "image-webpack-loader": "^3.4.2",
