@@ -9,6 +9,8 @@ let player
 let coinGroup
 let bulletGroup
 
+let shouldFire = true
+
 function createCoin (xPos, yPos) {
   const coinSprite = game.add.sprite(xPos, yPos, 'coin')
   game.physics.arcade.enable(coinSprite)
@@ -60,12 +62,37 @@ function createCoin (xPos, yPos) {
     idleTween.stop()
     collideTween.start()
     colorTween.start()
+
+    const emitter = game.add.emitter(coinSprite.x, coinSprite.y, 15)
+    emitter.makeParticles('coin')
+    emitter.gravity = 200
+    emitter.explode()
   })
 
   return coinSprite
 }
 
-function createBullet (x, y) {
+function createPlayer () {
+  const player = game.add.sprite(500, 600, 'cabbage')
+  player.animations.add('squeeze', [ 1, 0 ], 10)
+  return player
+}
+
+function fireBullet (player) {
+  if (!shouldFire) {
+    return
+  }
+
+  const x = player.x + 70
+  const y = player.y
+
+  shouldFire = false
+  player.animations.play('squeeze')
+
+  setTimeout(() => {
+    shouldFire = true
+  }, 500)
+
   const bullet = game.add.sprite(x, y, 'coin')
   game.physics.arcade.enable(bullet)
   bullet.body.setSize(80, 80, 40, 40)
@@ -75,41 +102,24 @@ function createBullet (x, y) {
   bullet.onCollision = new Phaser.Signal()
   bullet.onCollision.add(() => bullet.kill())
 
-  return bullet
+  bulletGroup.add(bullet)
+
+  bullet.anchor.set(0.5, 0.5)
+
+  const bulletTween = game.add.tween(bullet)
+    .to({ y: y - 1000, angle: '+360' }, 2000, Phaser.Easing.Quadratic.Out)
+
+  bulletTween.start()
 }
 
-function createPlayer () {
-  const player = game.add.sprite(500, 600, 'cabbage')
-  // playser.body.setSize(50, 50, 40, 40)
-
-  game.input.keyboard.onDownCallback = ({ key }) => {
-    switch (key) {
-      case 'ArrowLeft':
-        player.x -= 10
-        break
-      case 'ArrowRight':
-        player.x += 10
-        break
-      case ' ': //spacebar
-        // fire
-        const bullet = createBullet(player.x + 70, player.y)
-        bulletGroup.add(bullet)
-
-        bullet.anchor.set(0.5, 0.5)
-
-        const bulletTween = game.add.tween(bullet)
-          .to({ y: player.y - 1000, angle: '+360' }, 2000, Phaser.Easing.Quadratic.Out)
-
-        bulletTween.start()
-        break
-    }
-  }
+function destroyDeadObjects (group) {
+  group.forEachDead((object) => object.destroy())
 }
 
 game = new Game(1200, 800, Phaser.CANVAS, 'phaser-test', {
   preload () {
     game.load.spritesheet('coin', './assets/coin-spritesheet.png', 160, 160, 2)
-    game.load.image('cabbage', './assets/cabbage.png')
+    game.load.spritesheet('cabbage', './assets/cabbage-spritesheet.png', 160, 160, 2)
   },
 
   create () {
@@ -120,7 +130,6 @@ game = new Game(1200, 800, Phaser.CANVAS, 'phaser-test', {
       for (let y = 0; y < 3; y++) {
         const xPos = (x * 100) + 100
         const yPos = (y * 100) + (xPos / 5) + 100
-        console.log(xPos, yPos)
         const coin = createCoin(xPos, yPos)
         coinGroup.add(coin)
       }
@@ -130,13 +139,25 @@ game = new Game(1200, 800, Phaser.CANVAS, 'phaser-test', {
   },
 
   update () {
+    if (game.input.keyboard.isDown(Phaser.Keyboard.LEFT)) {
+      player.x -= 10
+    } else if (game.input.keyboard.isDown(Phaser.Keyboard.RIGHT)) {
+      player.x += 10
+    } else if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
+      fireBullet(player)
+    }
+
     game.physics.arcade.collide(bulletGroup, coinGroup, (bullet, coin) => {
       if (coin.collided) {
         return false
       }
       coin.onCollision.dispatch()
       bullet.onCollision.dispatch()
+      game.camera.shake(0.015, 250)
     })
+
+    destroyDeadObjects(coinGroup)
+    destroyDeadObjects(bulletGroup)
   },
 
   render () {
